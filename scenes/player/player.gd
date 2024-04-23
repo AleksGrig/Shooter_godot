@@ -1,10 +1,10 @@
 extends KinematicBody2D
 
 
-# Declare member variables here. Examples:
+# Declare member variables here.
 var can_laser: bool = true
 var can_grenade: bool = true
-signal laser
+signal laser(pos)
 signal grenade
 
 
@@ -20,13 +20,18 @@ func _process(_delta):
 	var _res = move_and_slide(velocity)
 
 	if Input.is_action_pressed("laser") and can_laser:
-		emit_signal("laser")
+		# randomly select Position2D for the laser start
+		var laser_markers: Array = $LaserStartPositions.get_children()
+		var selected_laser: Node = laser_markers[randi() % laser_markers.size()]
 		can_laser = false
 		$LaserTimer.start()
+		# emit the position we selected
+		emit_signal("laser", selected_laser.global_position)
 	elif Input.is_action_pressed("grenade") and can_grenade:
-		emit_signal("grenade")
 		can_grenade = false
 		$GrenadeTimer.start()
+		var pos = $LaserStartPositions.get_children()[0].global_position
+		emit_signal("grenade", pos)
 
 
 func _on_LaserTimer_timeout():
